@@ -20,6 +20,7 @@ import sys
 sys.path += ['/content/drive/My Drive/'] 
 ### ========== TODO : END ========== ###
 
+
 from nutil import *
 
 # Use only the provided packages!
@@ -301,7 +302,7 @@ def main():
     #========================================
     # part a: plot histograms of each feature
     print('Plotting...')
-    plot_histograms (X, y, Xnames=Xnames, yname=yname)
+    plot_histograms(X, y, Xnames=Xnames, yname=yname)
     
 
 
