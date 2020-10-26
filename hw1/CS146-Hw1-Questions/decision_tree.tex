@@ -1,0 +1,73 @@
+\section{Decision Tree}
+% Source: https://github.com/puttak/10601-18Fall-Homework/blob/master/HW2/F18_10601_HW2.pdf
+
+Consider the following Table\footnote{ Note that the first two rows in  Table \ref{tab:my_label} is same and it is not a typo.}:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{c|c|c|c}
+       X_1 & X_2 & X_3 & Y \\
+       \hline 
+        2 & 1&1  &1 \\ 
+        2 & 1&1  &1 \\
+        0 & 1&0  &1 \\
+        0 & 1&1  &0\\
+        2 & 0&0  &0 \\
+        1 & 0&1  &0 \\
+        0 & 0&0  &0 \\
+    \hline
+    \end{tabular}
+    \caption{Decision Tree Dataset}
+    \label{tab:my_label}
+\end{table}
+
+
+ Please use log base 2 and rounded to the fourth decimal place (e.g. 0.1234) and answer the following questions.
+\begin{enumerate}
+
+\item \itemworth{1}  What is the entropy of $Y$, $H(Y)$? 
+\\
+\solution{
+0.9852
+}
+\item \itemworth{1}  What is the  information gain of $Y$ and $X_1$, $I(Y;X_1)$? 
+\\
+\solution{
+0.4636
+}
+\item \itemworth{1}  What is the information gain of $Y$ and $X_2$, $I(Y;X_2)$? 
+\\
+\solution{
+0.9650
+}
+\item \itemworth{1}  What is the  information gain of $Y$ and $X_3$, $I(Y;X_3)$? 
+\\
+\solution{
+0.7871
+}
+\item \itemworth{1}  Which attribute ($X_1$,$X_3$, $X_3$) can be considered  branch on first by a decision tree algorithm  that uses the information gain as the splitting criterion? \\
+\solution{
+$X_2$
+}
+\item \itemworth{1}  Which attribute ($X_1$,$X_3$, $X_3$) can be considered  branch on second by a decision tree algorithm  that uses the information gain as the splitting criterion? \\
+\solution{
+$X_1$
+}
+
+
+
+\item \itemworth{1} If the same algorithm continues until the tree perfectly classifies the data, what would the depth of the tree be? \\
+\solution{
+3
+}
+
+
+
+\item \itemworth{1} Draw your completed Decision Tree. Label the non-leaf nodes with which attribute to split on (e.g. $X_2$), the edges with the value of the attribute (e.g. 2 or 0), and the leaf nodes with the classification decision (e.g. $Y$ = 0). \\
+\solution{
+\includegraphics[width=10cm, height=4cm]{dt.png}
+Here $A$ = $X_2$, B=$X_3$, C=$X_1$
+}
+
+
+\end{enumerate}

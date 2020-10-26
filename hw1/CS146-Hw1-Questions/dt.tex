@@ -1,0 +1,27 @@
+\section{Decision Tree \problemworth{15}}
+In a binary classification problem, there are $4000$ examples in the  class with label $1$ and $8000$ examples in the class with label $0$.     
+Recall that the information gain for target label $Y$ and feature $X$ is defined as $Gain = H [Y] - H [Y |X ]$, where $H [Y ] = - E[\log_2 P (Y )]$ is the entropy.
+
+
+\begin{enumerate}
+\item\itemworth{2}  What is the entropy of the class variable $Y$?
+
+\solution{}
+% \newpage
+
+\item \itemworth{5} Let's consider a binary feature $A$ for this problem. In the negative class (with label $0$), the number of instances that have $A=1$ and $A=0$ respectively: $(4000,4000)$. In the positive class (with label $1$), these numbers are: $(4000, 0)$. Write down conditional entropy and information gain of $A$ relative to $Y$?\\
+
+\solution{}
+        % \newpage
+\item\itemworth{5} 
+Let's consider another binary feature $B$. In the negative class (with label $0$) , the number of instances that have $B=0$ and $B=1$ respectively are: $(6000,2000)$. In the positive class (with label $1$), these numbers are: $(3000,1000)$. Write down conditional entropy and information gain of $B$ relative to $Y$?\\
+\solution{}
+% \newpage
+
+\item\itemworth{3} 
+Using information gain, which attribute will the ID3 decision tree learning algorithm choose at first?
+
+\solution{}
+
+\end{enumerate}
+

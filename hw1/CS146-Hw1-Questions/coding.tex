@@ -1,0 +1,171 @@
+\newpage
+\section{Programming exercise : Applying decision trees and k-nearest neighbors \problemworth{50}}
+
+\ifsoln
+\else
+
+\section*{Introduction\footnote{This assignment is adapted from the UCI Machine learning repository, available at \url{https://archive.ics.uci.edu/ml/datasets/adult}.}}
+
+This data was extracted from the 1994 Census bureau database by Ronny Kohavi and Barry Becker. For computational reasons, we have already extracted a relatively clean subset of the data for this HW. The prediction task is to determine whether a person makes over \$50K a year.
+
+In this problem, we ask you to complete the analysis of what sorts of people were likely to earn more than \$50K a year. In particular, we ask you to apply the tools of machine learning to predict which individuals are more likely to have high income. 
+
+
+\section*{Starter Files}
+
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+code and data
+\begin{itemize}[nolistsep]
+\item Code: \href{https://colab.research.google.com/drive/1_O5QwkZ33fnYbW3zwSnKjeVYkeoEtIeD?usp=sharing}{Fall2020-CS146-HW1.ipynb}\item Data: \href{https://drive.google.com/drive/folders/1xjZlT1TzoJ79Hd48fdjI1-gk7hnNOwTz?usp=sharing}{nutil.py and adult\_subsample.csv} 
+
+
+\end{itemize}
+documentation
+\begin{itemize}[nolistsep]
+\item Decision Tree Classifier: \\{\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html}}
+\item K-Nearest Neighbor Classifier: \\{\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html}} 
+\item Cross-Validation: \\{\footnotesize \url{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html}}
+\item Metrics: \\ {\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html}, \\
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html?highlight=f1%20score#sklearn.metrics.f1_score}} 
+\item Data Preprocessing: \\{\footnotesize \url{https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html?highlight=standardscaler#sklearn.preprocessing.StandardScaler}}
+\end{itemize}
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+
+
+Note that any portions of the code that you must modify have been indicated with \verb|TODO|. Do not change any code outside of these blocks.
+\fi
+
+To work on this HW: you need to download two files (i) nutil.py (ii) adult\_subsample.csv from  \href{https://drive.google.com/drive/folders/1xjZlT1TzoJ79Hd48fdjI1-gk7hnNOwTz?usp=sharing}{here}. Then copy/upload them to you own Google drive. 
+
+\ifsoln
+\else
+\clearpage
+\fi
+
+Next, for all the coding, please refer to the following colab notebook  
+\href{https://colab.research.google.com/drive/1_O5QwkZ33fnYbW3zwSnKjeVYkeoEtIeD?usp=sharing}{Fall2020-CS146-HW1.ipynb}. 
+
+\textbf{Before executing or writing down any code, please make a copy of the notebook and save it to your own google drive by clicking the “File” $\rightarrow$ “Save a copy in Drive”.} 
+
+\begin{minipage}[c]{.5\textwidth}
+%\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{save-colab-to-drive.png}
+%\end{figure}
+\end{minipage}%
+\begin{minipage}[c]{.45\textwidth}
+\end{minipage}%
+
+
+You will then be prompted to log into your google account. Please make sure all the work you implement is done on your own saved copy. You won’t to able to make changes on the the original notebook shared for the entire class. Running the first two cells will further mount your own google drive so that your copy of the Colab notebook will have access to the two files (nutil.py and adult\_subsample.csv) you’ve just uploaded.
+
+The notebook has marked blocks where you need to code. \\
+\\
+ $### ========= TODO  : START ========= ### $
+ 
+ $### ========= TODO :  END   ========== ###$
+\\
+
+\ifsoln
+\else
+\clearpage
+\fi
+
+\section*{Submission instructions for programming problems}
+\begin{itemize}
+\item Please export the notebook to a \verb|.py| file by clicking the “File” $\rightarrow$ “Download.py” and upload to CCLE.} 
+
+Your code should be commented appropriately. The most important things:
+\vspace{-\parskip}
+\begin{itemize}[nosep]
+\item Your name and the assignment number should be at the top of each file.
+\item Each class and method should have an appropriate doctsring.
+\item If anything is complicated, it should include some comments.
+\end{itemize}
+\vspace{-\parskip}
+There are many possible ways to approach the programming portion of this assignment, which makes code style and comments very important so that staff can understand what you did. For this reason, you will lose points for poorly commented or poorly organized code.
+\end{itemize}
+
+\begin{itemize}
+\item Please submit all the plots and the rest of the solutions (other than codes) to Gradescope
+\end{itemize}
+
+
+
+For the questions please read below.
+
+\subsection{Visualization \problemworth{5}}
+One of the first things to do before trying any formal machine learning technique is to dive into the data. This can include looking for funny values in the data, looking for outliers, looking at the range of feature values, what features seem important, etc.
+
+Note: We have already converted all the categorical features to numerical ones. The target column is the last one: "$>$50k", where 1 and 0 indicate $>$50k or $\le$ 50k respectively. The feature "fnlwgt" describes the number of people the census believes the entry represents. All the other feature names should be self-explanatory. If you want to learn more about this data please click  \href{https://archive.ics.uci.edu/ml/datasets/adult}{here}
+
+\begin{enumerate}
+\item \itemworth{5} Make histograms for each feature, separating the examples by class (e.g. income greater than 50k or smaller than or equal to 50k). This should produce fourteen plots, one for each feature, and each plot should have two overlapping histograms, with the color of the histogram indicating the class. For each feature, what trends do you observe in the data? (Please only describe the general trend. No need for more than two sentences per feature) 
+
+\solution{}
+
+\end{enumerate}
+
+\ifsolution{\newpage}
+\subsection{Evaluation \problemworth{45}}
+
+Now, let's use \verb|scikit-learn| to train a \verb|DecisionTreeClassifier| and \verb|KNeighborsClassifier| on the data.
+
+Using the predictive capabilities of the \verb|scikit-learn| package is very simple. In fact, it can be carried out in three simple steps: initializing the model, fitting it to the training data, and predicting new values.\footnote{Note that almost all of the model techniques in \verb|scikit-learn| share a few common named functions, once they are initialized. You can always find out more about them in the documentation for each model. These are \verb|some-model-name.fit(...)|, \verb|some-model-name.predict(...)|, and \verb|some-model-name.score(...)|.}
+
+
+\begin{enumerate}[resume]
+
+\item \itemworth{0} Before trying out any classifier, it is often useful to establish a \emph{baseline}. We have implemented one simple baseline classifier, \verb|MajorityVoteClassifier|, that always predicts the majority class from the training set. Read through the \verb|MajorityVoteClassifier| and its usage and make sure you understand how it works.
+
+Your goal is to implement and evaluate another baseline classifier, \verb|RandomClassifier|, that predicts a target class according to the distribution of classes in the training data set. For example, if 85\% of the examples in the training set have \verb|>50k = 0| and 15\% have \verb|>50k = 1|, then, when applied to a test set, \verb|RandomClassifier| should randomly predict 85\% of the examples as \verb|>50k = 0| and 15\% as \verb|>50k = 1|.
+
+Implement the missing portions of \verb|RandomClassifier| according to the provided specifications. Then train your \verb|RandomClassifier| on the entire training data set, and evaluate its training error. If you implemented everything correctly, you should have an error of {\color {red} {$0.374$.} }
+
+\item \itemworth{10} Now that we have a baseline, train and evaluate a \verb|DecisionTreeClassifier| (using the class from \verb|scikit-learn| and referring to the documentation as needed). Make sure you initialize your classifier with the appropriate parameters; in particular, use the `entropy' criterion discussed in class. What is the training error of this classifier?
+\solution{}
+
+\item \itemworth{5} Similar to the previous question, train and evaluate a \verb|KNeighborsClassifier| (using the class from \verb|scikit-learn| and referring to the documentation as needed). Use $k$=3, 5 and 7 as the number of neighbors and report the training error of this classifier.
+\solution{}
+
+\item \itemworth{10} So far, we have looked only at training error, but as we learned in class, training error is a poor metric for evaluating classifiers. Let's use cross-validation instead.
+
+Implement the missing portions of \verb|error(...)| according to the provided specifications. You may find it helpful to use \verb|StratifiedShuffleSplit(...)| from \verb|scikit-learn|. To ensure that we always get the same splits across different runs (and thus can compare the classifier results), set the \verb|random_state| parameter to be the same (e.g., 0).
+
+
+Next, use your \verb|error(...)| function to evaluate the training error and (cross-validation) test error and test micro averaged F1 Score (If you dont know what is F1, please click \href{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html?highlight=f1\%20score#sklearn.metrics.f1_score}{here}) of each of your four models (for the \verb|KNeighborsClassifier|, use $k$=5). To do this, generate a random $80/20$ split of the training data, train each model on the $80\%$ fraction, evaluate the error on either the $80\%$ or the $20\%$ fraction, and repeat this $100$ times to get an average result. What are the average training and test error of each of your classifiers on the adult\_subsample data set?
+
+\solution{}
+
+
+\item \itemworth{5} One way to find out the best value of $k$ for \verb|KNeighborsClassifier| is $n$-fold cross validation.
+Find out the best value of $k$ using 10-fold cross validation. You may find the \verb|cross_val_score(...)| from \verb|scikit-learn| helpful. Run 10-fold cross validation for all odd numbers ranging from 1 to 50 as the number of neighbors.
+Then plot the validation error against the number of neighbors, $k$.
+Include this plot in your writeup, and provide a 1-2 sentence description of your observations. What is the best value of $k$?
+
+\solution{}
+
+\item \itemworth{5} One problem with decision trees is that they can \emph{overfit} to training data, yielding complex classifiers that do not generalize well to new data. Let's see whether this is the case.
+
+One way to prevent decision trees from overfitting is to limit their depth. Repeat your cross-validation experiments but for increasing depth limits, specifically, $1,2,\ldots,20$. Then plot the average training error and test error against the depth limit. 
+Include this plot in your writeup, making sure to label all axes and include a legend for your classifiers. What is the best depth limit to use for this data? Do you see overfitting? Justify your answers using the plot.
+
+\solution{}
+
+\item \itemworth{5} Another useful tool for evaluating classifiers is \emph{learning curves}, which show how classifier performance (e.g. error) relates to experience (e.g. amount of training data).
+For this experiment, first generate a random 90/10 split of the training data and do the following experiments considering the 90\% fraction as training and 10\% for testing. 
+
+Run experiments for the decision tree and k-nearest neighbors classifier with the best depth limit and $k$ value you found above.
+This time, vary the amount of training data by starting with splits of $0.10$ ($10\%$ of the data from 90\% fraction) and working up to full size $1.00$ ($100\%$ of the data from 90\% fraction) in increments of $0.10$. Then plot the decision tree and k-nearest neighbors training and test error against the amount of training data. 
+Include this plot in your writeup, and provide a 1-2 sentence description of your observations.
+
+\solution{}
+
+\item \itemworth{5} Pre-process the data by standardizing it. See the sklearn.preprocessing.StandardScaler package for details. After performing the standardization such as normalization please run all previous steps part (b) to part (h) and report what difference you see in performance.   \\
+\solution{}
+
+\end{enumerate}
+
+
