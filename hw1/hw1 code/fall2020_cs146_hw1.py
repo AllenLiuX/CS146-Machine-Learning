@@ -277,10 +277,7 @@ def error(clf, X, y, ntrials=100, test_size=0.2) :
     train_error = np.average(train_errors)
     test_error = np.average(test_errors)
     f1_score = np.average(f1_scores)
-    print('\t-- average training error: %.3f' % train_error)
-    print('\t-- average testing error: %.3f' % test_error)
-    print('\t-- average f1_score: %.3f' % f1_score)
-   
+
     ### ========== TODO : END ========== ###
 
     return train_error, test_error, f1_score
@@ -335,7 +332,9 @@ def main():
 
     ### ========== TODO : START ========== ###
     # part i: Preprocess X (e.g., normalize)
-    
+    scaler = StandardScaler()
+    scaler.fit(X)
+    scaler.transform(X)
     ### ========== TODO : END ========== ###
 
 
@@ -362,6 +361,7 @@ def main():
     y_pred = clf2.predict(X)
     train_error = 1 - metrics.accuracy_score(y, y_pred, normalize=True)
     print('\t-- training error: %.3f' % train_error)
+
     ### ========== TODO : END ========== ###
 
 
@@ -404,17 +404,33 @@ def main():
     ### ========== TODO : START ========== ###
     # part e: use cross-validation to compute average training and test error of classifiers
     print('Investigating various classifiers...')
-    
-    ### ========== TODO : END ========== ###
+
     print('\tresults for majority vote classifier: ')
-    error(clf, X, y)
+    train_error, test_error, f1_score = error(clf, X, y)
+    print('\t-- average training error: %.3f' % train_error)
+    print('\t-- average testing error: %.3f' % test_error)
+    print('\t-- average f1_score: %.3f' % f1_score)
+
     print('\tresults for random classifier: ')
-    error(clf2, X, y)
+    train_error, test_error, f1_score = error(clf2, X, y)
+    print('\t-- average training error: %.3f' % train_error)
+    print('\t-- average testing error: %.3f' % test_error)
+    print('\t-- average f1_score: %.3f' % f1_score)
+
     print('\tresults for decision tree classifier: ')
-    error(clf3, X, y)
+    train_error, test_error, f1_score = error(clf3, X, y)
+    print('\t-- average training error: %.3f' % train_error)
+    print('\t-- average testing error: %.3f' % test_error)
+    print('\t-- average f1_score: %.3f' % f1_score)
+
     print('\tresults for k-Nearest classifier: ')
     clf4 = KNeighborsClassifier(n_neighbors=5)
-    error(clf4, X, y)
+    train_error, test_error, f1_score = error(clf4, X, y)
+    print('\t-- average training error: %.3f' % train_error)
+    print('\t-- average testing error: %.3f' % test_error)
+    print('\t-- average f1_score: %.3f' % f1_score)
+
+    ### ========== TODO : END ========== ###
 
 
     ### ========== TODO : START ========== ###
@@ -426,9 +442,17 @@ def main():
         cur_clf = KNeighborsClassifier(n_neighbors=k)
         cur_scores = cross_val_score(cur_clf, X, y, cv=10)
         scores.append(np.average(cur_scores))
-    print(scores)
-    # plt.plot(k_vals, scores)
+    # print(scores)
+    # find k value at the position with max score
+    best_k = k_vals[scores.index(max(scores))]
+    print('\tThe best value of number neighbors: ', best_k)
+    plt.figure()
+    plt.plot(k_vals, scores)
+    plt.xlabel('number of neighbors, k')
+    plt.ylabel('cross val score')
+    plt.title('figure of k-Nearest Neighbors performance vs neighbors num')
     # plt.show()
+    plt.savefig('score vs neighbors.jpg')
 
     ### ========== TODO : END ========== ###
 
@@ -439,7 +463,30 @@ def main():
     ### ========== TODO : START ========== ###
     # part g: investigate decision tree classifier with various depths
     print('Investigating depths...')
-    
+    d_vals = range(1, 21)
+    train_errs = []
+    test_errs = []
+    for d in d_vals:
+        cur_clf = DecisionTreeClassifier(criterion='entropy', max_depth=d)
+        train_err, test_err, f1_score = error(cur_clf, X, y, 10, 0.2)
+        # cur_scores = cross_val_score(cur_clf, X, y, cv=10)
+        # scores.append(np.average(cur_scores))
+        train_errs.append(train_err)
+        test_errs.append(test_err)
+    # print(test_errs)
+    # print(train_errs)
+    # find d value at the position with min test error
+    best_d = d_vals[test_errs.index(min(test_errs))]
+    print('\tThe best value of max_depth: ', best_d)
+    plt.figure()
+    plt.plot(d_vals, train_errs, label='train error')
+    plt.plot(d_vals, test_errs, label='test error')
+    plt.xlabel('max depth, d')
+    plt.ylabel('cross val score')
+    plt.title('figure of decision tree performance vs max depth d')
+    plt.legend()
+    # plt.show()
+    plt.savefig('score vs depth.jpg')
 
     ### ========== TODO : END ========== ###
 
@@ -449,7 +496,54 @@ def main():
 
     ### ========== TODO : START ========== ###
     # part h: investigate decision tree and k-Nearest Neighbors classifier with various training set sizes
-    
+    from sklearn.model_selection import train_test_split
+    print('investigating with various training set sizes...')
+    training_size = [i/10 for i in range(1, 11)]     # generate [0.1, 0.2, ...]
+    decision_train_errs = []
+    decision_test_errs = []
+    neighbors_train_errs = []
+    neighbors_test_errs = []
+    for size in training_size:
+        sss = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=0)
+        train_errors = []
+        test_errors = []
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.1)
+        X_train = X_train[:int(len(X_train) * size)]
+        y_train = y_train[:int(len(y_train) * size)]
+        # fit and predict
+        clf_k = KNeighborsClassifier(n_neighbors=best_k)
+        clf_k.fit(X_train, y_train)
+        y_pred_train_k = clf_k.predict(X_train)
+        y_pred_test_k = clf_k.predict(X_test)
+
+        clf_d = DecisionTreeClassifier(criterion='entropy', max_depth=best_d)
+        clf_d.fit(X_train, y_train)
+        y_pred_train_d = clf_d.predict(X_train)
+        y_pred_test_d = clf_d.predict(X_test)
+
+        # calculate the error
+        train_error = 1 - metrics.accuracy_score(y_train, y_pred_train_k, normalize=True)
+        test_error = 1 - metrics.accuracy_score(y_test, y_pred_test_k, normalize=True)
+        neighbors_train_errs.append(train_error)
+        neighbors_test_errs.append(test_error)
+
+        train_error = 1 - metrics.accuracy_score(y_train, y_pred_train_d, normalize=True)
+        test_error = 1 - metrics.accuracy_score(y_test, y_pred_test_d, normalize=True)
+        decision_train_errs.append(train_error)
+        decision_test_errs.append(test_error)
+
+    plt.figure()
+    plt.plot(training_size, decision_train_errs, label='decision tree train error')
+    plt.plot(training_size, decision_test_errs, label='decision tree test error')
+    plt.plot(training_size, neighbors_train_errs, label='K-neighbor train error')
+    plt.plot(training_size, neighbors_test_errs, label='K-neighbor test error')
+    plt.xlabel('training size')
+    plt.ylabel('error')
+    plt.title('figure of classifiers performance vs training size')
+    plt.legend()
+    # plt.show()
+    plt.savefig('error vs training size.jpg')
+
     ### ========== TODO : END ========== ###
 
 
