@@ -77,7 +77,7 @@ class MajorityVoteClassifier(Classifier) :
         --------------------
             self -- an instance of self
         """
-        majority_val = Counter(y).most_common(1)[0][0]
+        majority_val = Counter(y).most_common(1)[0][0] # (1) means return 1 most common value, [0]->first item [0.0 760]
         self.prediction_ = majority_val
         return self
 
@@ -132,7 +132,8 @@ class RandomClassifier(Classifier) :
 
         ### ========== TODO : START ========== ###
         # part b: set self.probabilities_ according to the training set
-        
+        c = Counter(y)
+        self.probabilities_ = c[1]/(c[0]+c[1])  # prob of predicting 1 -> cases of 1 divided by the total cases
 
         ### ========== TODO : END ========== ###
 
@@ -158,8 +159,8 @@ class RandomClassifier(Classifier) :
         ### ========== TODO : START ========== ###
         # part b: predict the class for each test example
         # hint: use np.random.choice (be careful of the parameters)
-
-        
+        y = np.random.choice(2, len(X), p=[1-self.probabilities_, self.probabilities_])
+        # print(y)
         ### ========== TODO : END ========== ###
 
         return y
@@ -252,7 +253,33 @@ def error(clf, X, y, ntrials=100, test_size=0.2) :
     ### ========== TODO : START ========== ###
     # compute cross-validation error using StratifiedShuffleSplit over ntrials
     # hint: use train_test_split (be careful of the parameters)
-    
+    sss = StratifiedShuffleSplit(n_splits=ntrials, test_size=test_size, random_state=0)
+    train_errors = []
+    test_errors = []
+    f1_scores = []      # return the averaged f1_score?
+    for train_index, test_index in sss.split(X, y):
+        # split the data into training set and testing set
+        X_train, y_train = X[train_index], y[train_index]
+        X_test, y_test = X[test_index], y[test_index]
+        # fit and predict
+        clf.fit(X_train, y_train)
+        y_pred_train = clf.predict(X_train)
+        y_pred_test = clf.predict(X_test)
+        # calculate the error
+        f1_score_train = metrics.f1_score(y_train, y_pred_train, average='micro')
+        train_error = 1 - f1_score_train
+        f1_score_test = metrics.f1_score(y_test, y_pred_test, average='micro')
+        test_error = 1 - f1_score_test
+        train_errors.append(train_error)
+        test_errors.append(test_error)
+        f1_scores += [f1_score_train, f1_score_test]
+    # calculate the average error
+    train_error = np.average(train_errors)
+    test_error = np.average(test_errors)
+    f1_score = np.average(f1_scores)
+    print('\t-- average training error: %.3f' % train_error)
+    print('\t-- average testing error: %.3f' % test_error)
+    print('\t-- average f1_score: %.3f' % f1_score)
    
     ### ========== TODO : END ========== ###
 
@@ -295,8 +322,6 @@ def main():
     y = data.y; yname = data.yname
     n,d = X.shape  # n = number of examples, d =  number of features
 
-    print(X)
-    print(y)
 
     plt.figure()
     #========================================
@@ -332,7 +357,11 @@ def main():
     ### ========== TODO : START ========== ###
     # part b: evaluate training error of Random classifier
     print('Classifying using Random...')
-
+    clf2 = RandomClassifier()
+    clf2.fit(X, y)
+    y_pred = clf2.predict(X)
+    train_error = 1 - metrics.accuracy_score(y, y_pred, normalize=True)
+    print('\t-- training error: %.3f' % train_error)
     ### ========== TODO : END ========== ###
 
 
@@ -342,6 +371,11 @@ def main():
     ### ========== TODO : START ========== ###
     # part c: evaluate training error of Decision Tree classifier
     print('Classifying using Decision Tree...')
+    clf3 = DecisionTreeClassifier(criterion='entropy')
+    clf3.fit(X, y)
+    y_pred = clf3.predict(X)
+    train_error = 1 - metrics.accuracy_score(y, y_pred, normalize=True)
+    print('\t-- training error: %.3f' % train_error)
 
     ### ========== TODO : END ========== ###
 
@@ -354,7 +388,13 @@ def main():
     # part d: evaluate training error of k-Nearest Neighbors classifier
     # use k = 3, 5, 7 for n_neighbors
     print('Classifying using k-Nearest Neighbors...')
-    
+    for neighbors in [3,5,7]:
+        clf4 = KNeighborsClassifier(n_neighbors=neighbors)
+        clf4.fit(X, y)
+        y_pred = clf4.predict(X)
+        train_error = 1 - metrics.accuracy_score(y, y_pred, normalize=True)
+        print('\t-- training error for k=%d: %.3f' %(neighbors, train_error))
+
     ### ========== TODO : END ========== ###
 
 
@@ -366,14 +406,29 @@ def main():
     print('Investigating various classifiers...')
     
     ### ========== TODO : END ========== ###
-
-
-
+    print('\tresults for majority vote classifier: ')
+    error(clf, X, y)
+    print('\tresults for random classifier: ')
+    error(clf2, X, y)
+    print('\tresults for decision tree classifier: ')
+    error(clf3, X, y)
+    print('\tresults for k-Nearest classifier: ')
+    clf4 = KNeighborsClassifier(n_neighbors=5)
+    error(clf4, X, y)
 
 
     ### ========== TODO : START ========== ###
     # part f: use 10-fold cross-validation to find the best value of k for k-Nearest Neighbors classifier
     print('Finding the best k...')
+    k_vals = range(1, 50, 2)
+    scores = []
+    for k in k_vals:
+        cur_clf = KNeighborsClassifier(n_neighbors=k)
+        cur_scores = cross_val_score(cur_clf, X, y, cv=10)
+        scores.append(np.average(cur_scores))
+    print(scores)
+    # plt.plot(k_vals, scores)
+    # plt.show()
 
     ### ========== TODO : END ========== ###
 
