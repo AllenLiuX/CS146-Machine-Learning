@@ -1,0 +1,346 @@
+\documentclass[11pt]{article}
+\usepackage{course}
+\usepackage{upquote}
+\usepackage{minted}
+\usepackage{amssymb}
+\fvset{frame=single}
+
+\usepackage{hyperref}
+
+
+
+\begin{document}
+
+
+\ctitle{2}{Linear Classification and Logistic Regression}{Nov. 12 at 11:59 pm}
+\author{}
+\date{}
+\maketitle
+\vspace{-0.75in}
+
+\vspace{-11pt}
+
+\blfootnote{Parts of this assignment are adapted from course material by Andrew Ng (Stanford), Jenna Wiens (UMich) and Jessica Wu (Harvey Mudd).}
+
+\ifsoln
+\else
+\section*{Submission Instructions}
+\begin{itemize}
+\item 
+Submit your solutions electronically on the course Gradescope site as PDF files.
+\item If you plan to typeset your solutions, please use the LaTeX solution template. If you must submit scanned handwritten solutions, please use a black pen on blank white paper and a high-quality scanner app.
+\item For questions involving math and derivation, please provide important intermediate steps and box the final answer clearly.
+\item You are required to submit the code only for Question 3 - Polynomial Regression in CCLE. For the sub-questions in Question 3 requiring you to complete a piece of code, you are expected to copy-paste your code as a part of the solution in the submission pdf to receive full credit.
+\end{itemize}
+\fi
+
+\ifnotsolution{\newpage}
+\section{Linear Model \problemworth{15}}
+\begin{enumerate}
+\item Design a two-input linear model $w_1 X_1 + w_2X_2 + b$ that computes the following Boolean functions. Assume $T=1$ and $F=0$. If a valid linear model exists, show that it is not unique by designing another valid linear model. If no such linear model exists, explain why.
+\begin{itemize}
+	\item [(i)] OR \problemworth{5}
+	\item [(ii)] XOR \problemworth{5}
+\end{itemize}
+
+\solution{
+}
+
+\item How many distinct Boolean functions are possible with two Boolean variables? Out of them, how many can be represented by a linear model? Justify your answers. \problemworth{5}
+
+\solution{}
+\end{enumerate}
+
+\section{Logistic Regression and its Variant \problemworth{45}}
+
+Consider the logistic regression model for binary classification that takes input features $\vect{x}_n\in R^m$ and predicts $y_n \in \{1,0\}$. 
+As we learned in class, the logistic regression model fits the probability $P(y_n = 1)$ using the \textit{sigmoid} function:
+\begin{equation}
+    P(y_n = 1) = h(\vect{x}_n) = \sigma(\vect{w}^T \vect{x}_n+b) = \frac{1}{1+ \exp(-\vect{w}^T\vect{x}_n-b)}.
+\end{equation}
+Given $N$ training data points, we learn the logistic regression model by minimizing the negative log-likelihood:
+\begin{equation}
+\label{eq:j}
+J(\vect{w}, b) = 
+  -  \sum_{n=1}^{N}{
+  \left[ y_{n} \log h\left(\vect{x}_{n}\right) 
+  + \left(1 - y_{n}\right) \log \left(1 - h\left(\vect{x}_{n}\right)\right) \right]}.
+\end{equation}
+\begin{enumerate}
+
+\item  In the following, we derive the stochastic gradient descent algorithm for logistic regression. \problemworth{20}
+
+\begin{enumerate}
+    \item Partial derivatives $\frac{\partial J}{\partial w_j}$ and $\frac{\partial J}{\partial b}$, where $w_j$ is the j-th element of the weight vector \vect{w}. \problemworth{5 + 5}
+    
+    \solution{}
+
+    \item Write down the stochastic gradient descent algorithm for minimizing Eq. \eqref{eq:j} using the partial derivatives computed above. \problemworth{5}
+    
+    \solution{}
+    \item Compare the stochastic gradient descent algorithm for logistic regression with the Perceptron algorithm. What are the similarities and what are the differences? \problemworth{5}
+    
+    \solution{}
+\end{enumerate}
+
+
+\item Instead of using the \textit{sigmoid} function, we would like to use the following transformation function:
+\begin{equation*}
+    \sigma_A(z) = \frac{\exp(z) - \exp(-z)}{\exp(z) + \exp(-z)}.
+\end{equation*}
+Answer the following questions \problemworth{25}:
+\begin{enumerate}
+\item Plot $\sigma_A(z)$ as a function of \textit{z} in python using \textit{matplotlib} and \textit{numpy} libraries. Consider $z$ $\in$ $[-10, 10]$ for the plot. 
+What are the similarities and differences between $\sigma$ and $\sigma_A$? What happens as $z$ $\rightarrow$ $\infty$ and $z$ $\rightarrow$ $-\infty$. \problemworth{5}
+
+\solution{}
+
+\item Prove the following: \problemworth{5}
+\begin{equation*}
+    \frac{d\sigma_A(z)}{dz} = 1 - \sigma_{A}^{2}(z).
+\end{equation*}
+
+\solution{}
+
+\item Can we assume probability $P(y_n = 1)$ = $\sigma_A(\vect{w}^T \vect{x}_n+b)$? Why or why not? \problemworth{2}
+
+\solution{}
+
+\item If we assume 
+
+\begin{equation*}
+    P(y_n = 1) = h_A(\vect{x}_n) = \frac{1+\sigma_A(\vect{w}^T\vect{x}_n+b)}{2}.
+\end{equation*}
+Given $N$ examples, $\{\vect{x}_n, y_n\}_{n=1}^N$,
+please write down the corresponding negative log-likelihood function $J_A(\vect{w}, b)$. \problemworth{3}
+
+\solution{}
+
+\item Compute the partial derivatives  $\frac{\partial J_A}{\partial w_j}$ and $\frac{\partial J_A}{\partial b}$. \problemworth{5}
+
+\solution{}
+
+\item Write down the stochastic gradient descent algorithm for minimizing $J_A(\vect{w}, b)$.  \problemworth{5}
+
+\solution{}
+\end{enumerate}
+
+\end{enumerate}
+
+
+
+\newpage
+\section{Implementation: Polynomial Regression \problemworth{40}}
+
+In this exercise, you will work through linear and polynomial regression. Our data consists of inputs $x_n \in \mathbb{R}$ and outputs $y_n \in \mathbb{R}, n \in \{1,\ldots,N\}$, which are related through a target function $y = f(x)$. Your goal is to learn a linear predictor $h_{\vect{w}}(x)$ that best approximates $f(x)$. But this time, rather than using \verb|scikit-learn|, we will further open the ``black-box'', and you will implement the regression model!
+
+\rule{\textwidth}{1pt}
+code and data
+\begin{itemize}[nolistsep]
+\item \href{https://colab.research.google.com/drive/1fl_SOlAx2dLOF6wV8rO24wq3Nd0vT4_x?usp=sharing}{code} : \verb|Fall2020-CS146-HW2.ipynb|
+\item \href{https://drive.google.com/drive/folders/1VyQwXI5Fi05UvwyuTdwQjVevYJzVWqLv?usp=sharing}{data} : \verb|train.csv|, \verb|test.csv|
+\end{itemize}
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+
+Please use your \textit{@g.ucla.edu} email id to access the code and data. Similar to \textit{HW-1}, copy the colab notebook to your drive and make the changes. Mount the drive appropriately and copy the shared data folder to your drive to access via colab. For colab usage demo, check out the Discussion recordings for Week 2 in CCLE. 
+The notebook has marked blocks where you need to code. \\
+\\
+ $\#\#\# ========= TODO  : START ========= \#\#\#$
+ 
+ $\#\#\# ========= TODO :  END   ========== \#\#\#$
+
+\textbf{Note: For the questions requiring you to complete a piece of code, you are expected to copy-paste your code as a part of the solution in the submission pdf. Tip: If you are using \LaTeX, check out the Minted package (\href{https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted}{example}) for code highlighting.} 
+
+This is likely the first time that many of you are working with \verb|numpy| and matrix operations within a programming environment. For the uninitiated, you may find it useful to work through a \verb|numpy| tutorial first.\footnote{Try out \verb~SciPy~'s tutorial (\url{http://wiki.scipy.org/Tentative_NumPy_Tutorial}), or use your favorite search engine to find an alternative. Those familiar with Matlab may find the ``Numpy for Matlab Users'' documentation (\url{http://wiki.scipy.org/NumPy_for_Matlab_Users}) more helpful.} Here are some things to keep in mind as you complete this problem:
+\begin{itemize}[nosep]
+\item If you are seeing many errors at runtime, inspect your matrix operations to make sure that you are adding and multiplying matrices of compatible dimensions. Printing the dimensions of variables with the \verb|X.shape| command will help you debug.
+\item When working with \verb|numpy| arrays, remember that \verb|numpy| interprets the \verb|*| operator as element-wise multiplication. This is a common source of size incompatibility errors. If you want matrix multiplication, you need to use the \verb|dot| function in Python. For example, \verb|A*B| does element-wise multiplication while \verb|dot(A,B)| does a matrix multiply.
+\item Be careful when handling \verb|numpy| vectors (rank-1 arrays): the vector shapes $1 \times N$, $N \times 1$, and $N$ are all different things. For these dimensions, we follow the the conventions of \verb|scikit-learn|'s \verb|LinearRegression| class\footnote{\url{http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html}}. Most importantly, unless otherwise indicated (in the code documentation), both column and row vectors are rank-1 arrays of shape $N$, not rank-2 arrays of shape $N \times 1$ or shape $1 \times N$.
+\end{itemize}
+
+
+
+\vspace{10pt} {\large \textbf{Visualization} \problemworth{2}}
+
+It is often useful to understand the data through visualizations. For this data set, you can use a scatter plot to visualize the data since it has only two properties to plot ($x$ and $y$).
+
+\begin{enumerate}
+
+\item Visualize the training and test data using the \verb|plot_data(...)| function. What do you observe? For example, can you make an educated guess on the effectiveness of linear regression in predicting the data? \problemworth{2}
+
+\solution{
+}
+
+\end{enumerate}
+
+\vspace{10pt} {\large \textbf{Linear Regression} \problemworth{23}}
+
+Recall that linear regression attempts to minimize the objective function
+\begin{equation*}
+J(\vect{w}) =  \sum_{n=1}^{N}{\left(h_{\vect{w}}(\vect{x}_{n}) - y_{n}\right)^2}.
+\end{equation*}
+
+In this problem, we will use the matrix-vector form where
+\begin{equation*}
+\vect{y} =\begin{pmatrix}
+y_{1}\\
+y_{2}\\
+\vdots\\
+y_{N}
+\end{pmatrix},
+\quad \quad \quad
+\matr{X} = \begin{pmatrix}
+\vect{x}_{1}^T \\
+\vect{x}_{2}^T  \\
+\vdots  \\
+\vect{x}_{N}^T  \\
+\end{pmatrix},
+\quad \quad \quad
+\vect{w} = \begin{pmatrix}
+w_0\\
+w_1\\
+w_2\\
+\vdots\\
+w_D
+\end{pmatrix}
+\end{equation*}
+and each instance $\vect{x}_{n} = \bigl( 1, x_{n,1}, \ldots, x_{n,D} \bigr)^T$. 
+
+In this instance, the number of input features $D=1$. 
+
+Rather than working with this fully generalized, multivariate case, let us start by considering a simple linear regression model:
+\begin{equation*}
+h_{\vect{w}}(\vect{x}) = \vect{w}^T \vect{x} = w_0 + w_1 x_1
+\end{equation*}
+
+
+\verb|regression.py| contains the skeleton code for the class \verb|PolynomialRegression|. Objects of this class can be instantiated as \verb|model = PolynomialRegression (m)| where $m$ is the degree of the polynomial feature vector where the feature vector for instance $n$, $\bigl( 1, x_{n,1}, x_{n,1}^2, \ldots, x_{n,1}^{m} \bigr)^T$. Setting $m=1$ instantiates an object where the feature vector for instance $n$, $\bigl( 1, x_{n,1}\bigr)^T$. 
+
+\begin{enumerate}[resume]
+\item Note that to take into account the intercept term ($w_0$), we can add an additional ``feature'' to each instance and set it to one, e.g. $x_{i,0} = 1$. This is equivalent to adding an additional first column to $\matr{X}$ and setting it to all ones \problemworth{2}.
+
+Modify \verb|PolynomialRegression.generate_polynomial_features(...)| to create the matrix $\matr{X}$ for a simple linear model.
+
+\solution{}
+
+\item Before tackling the harder problem of training the regression model, complete \\\verb|PolynomialRegression.predict(...)| to predict $\vect{y}$ from $\matr{X}$ and $\vect{w}$. \problemworth{3}
+
+\solution{}
+
+\item One way to solve linear regression is through gradient descent (GD).
+
+Recall that the parameters of our model are the $w_j$ values. These are the values we will adjust to minimize $J(\vect{w})$.
+\begin{equation*}
+J(\vect{w}) = \sum_{n=1}^{N} (h_{\vect{w}}(\vect{x}_{n}) - y_{n})^2
+\end{equation*}
+In gradient descent, each iteration performs the update
+\begin{equation*}
+w_j \leftarrow w_j - 2  \eta \sum_{n=1}^{N} \left( h_{\vect{w}}(\vect{x}_{n}) - y_{n} \right) x_{n,j} \textrm{\quad (simultaneously update $w_j$ for all $j$)}.
+\end{equation*}
+With each step of gradient descent, we expect our updated parameters $w_j$ to come closer to the parameters that will achieve the lowest value of $J(\vect{w})$. \problemworth{10}
+
+\begin{itemize}
+
+\item \itemworth{2} As we perform gradient descent, it is helpful to monitor the convergence by computing the cost, \emph{i.e.}, the value of the objective function $J$. Complete \verb|PolynomialRegression.cost(...)| to calculate $J(\vect{w})$.
+
+If you have implemented everything correctly, then the following code snippet should print the model cost as $230.867214$.
+\begin{minted}{python}
+model = PolynomialRegression(1)
+model.coef_ = np.zeros(2)
+c = model.cost (train_data.X, train_data.y)
+print(f'model_cost:{c}')
+\end{minted}
+
+\solution{}
+
+\item \itemworth{3} Next, implement the gradient descent step in \verb|PolynomialRegression.fit_GD(...)|.  The loop structure has been written for you, and you only need to supply the updates to $\vect{w}$ and the new predictions $\hat{y} = h_{\vect{w}}(\vect{x})$ within each iteration.
+
+We will use the following specifications for the gradient descent algorithm:
+\begin{itemize}
+\item We run the algorithm for $10,000$ iterations.
+\item We terminate the algorithm earlier if the value of the objective function is unchanged across consecutive iterations.
+\item We will use a fixed learning rate. 
+\end{itemize}
+
+\solution{}
+
+\item \itemworth{5} Experiment with different values of learning rate $\eta = 10^{-6}$, $10^{-5}$, $10^{-3}$, 0.0168 and make a table of the coefficients, number of iterations until convergence (this number will be $10,000$ if the algorithm did not converge in a smaller number of iterations) and the final value of the objective function. How do the coefficients compare? How quickly does each algorithm converge? Do you observe something strange when you run with $\eta$ = 0.0168? Explain the observation and causes.
+
+\solution{
+}
+
+\end{itemize}
+
+\item In class, we learned that the closed-form solution to linear regression is
+\begin{equation*}
+\vect{w} = (\matr{X}^T \matr{X})^{-1} \matr{X}^T \vect{y}.
+\end{equation*}
+Using this formula, you will get an exact solution in one calculation: there is no ``loop until convergence'' like in gradient descent. \problemworth{4}
+
+\begin{itemize}
+\item \itemworth{2} Implement the closed-form solution \verb|PolynomialRegression.fit(...)|.
+
+\solution{}
+
+\item \itemworth{2} What is the closed-form solution coefficients? How do the coefficients and the cost compare to those obtained by GD? How quickly does the algorithm run compared to GD?
+
+\solution{
+}
+\end{itemize}
+
+\item Finally, set a learning rate $\eta$ for GD that is a function of $k$ (the number of iterations) (use $\eta_k = \tfrac{1}{1+k}$) and converges to the same solution yielded by the closed-form optimization (minus possible rounding errors). Update \verb|PolynomialRegression.fit_GD(...)| with your proposed learning rate. How many iterations does it take the algorithm to converge with your proposed learning rate? \problemworth{4}
+
+\solution{
+}
+
+\end{enumerate}
+
+
+
+\vspace{10pt} {\large \textbf{Polynomial Regression}\problemworth{15}}
+
+Now let us consider the more complicated case of polynomial regression, where our hypothesis is
+\begin{equation*}
+h_{\vect{w}}(\vect{x}) = \vect{w}^T \phi(\vect{x}) = w_0 + w_1 x + w_2 x^2 + \ldots + w_m x^m.
+\end{equation*}
+
+\begin{enumerate}[resume]
+
+\item Recall that polynomial regression can be considered as an extension of linear regression in which we replace our input matrix $\matr{X}$ with
+\begin{equation*}
+\matr{\Phi} = \begin{pmatrix}
+\phi(x_{1})^T  \\
+\phi(x_{2})^T  \\
+\vdots  \\
+\phi(x_{N})^T \\
+\end{pmatrix},
+\end{equation*}
+where $\phi(x)$ is a function such that $\phi_j(x) = x^j$ for $j = 0, \ldots, m$.
+
+Update \verb|PolynomialRegression.generate_polynomial_features(...)| to create an $m+1$ dimensional feature vector for each instance. \problemworth{4}
+
+\solution{}
+
+\item Given $N$ training instances, it is always possible to obtain a ``perfect fit'' (a fit in which all the data points are exactly predicted) by setting the degree of the regression to $N-1$. Of course, we would expect such a fit to generalize poorly. In the remainder of this problem, you will investigate the problem of overfitting as a function of the degree of the polynomial, $m$. To measure overfitting, we will use the Root-Mean-Square (RMS) error, defined as 
+\begin{equation*}
+E_{RMS} = \sqrt{J(\vect{w}) / N},
+\end{equation*}
+
+where $N$ is the number of instances.\footnote{Note that the RMSE as defined is a biased estimator. To obtain an unbiased estimator, we would have to divide by $n-k$, where $k$ is the number of parameters fitted (including the constant), so here, $k = m+1$.}
+
+Why do you think we might prefer RMSE as a metric over $J(\vect{w})$?
+
+Implement \verb|PolynomialRegression.rms_error(...)|. \problemworth{4}
+
+\solution{
+}
+
+\item For $m = 0, \ldots, 10$ (where $m$ is the order of the polynomial transformation applied to features), use the closed-form solver to determine the best-fit polynomial regression model on the training data, and with this model, calculate the RMSE on both the training data and the test data. Generate a plot depicting how RMSE varies with model complexity (polynomial degree) -- you should generate a single plot with both training and test error, and include this plot in your writeup. Which degree polynomial would you say best fits the data? Was there evidence of under/overfitting the data? Use your plot to justify your answer. \problemworth{7}
+
+\solution{
+}
+
+\end{enumerate}
+
+\end{document}

@@ -272,7 +272,7 @@ def error(clf, X, y, ntrials=100, test_size=0.2) :
         test_error = 1 - f1_score_test
         train_errors.append(train_error)
         test_errors.append(test_error)
-        f1_scores += [f1_score_train, f1_score_test]
+        f1_scores.append(f1_score_test)
     # calculate the average error
     train_error = np.average(train_errors)
     test_error = np.average(test_errors)
@@ -289,7 +289,7 @@ def error(clf, X, y, ntrials=100, test_size=0.2) :
 
 def write_predictions(y_pred, filename, yname=None) :
     """Write out predictions to csv file."""
-    out = open(filename, 'wb')
+    out = open(filename, 'w')
     f = csv.writer(out)
     if yname :
         f.writerow([yname])
@@ -333,8 +333,7 @@ def main():
     ### ========== TODO : START ========== ###
     # part i: Preprocess X (e.g., normalize)
     scaler = StandardScaler()
-    scaler.fit(X)
-    scaler.transform(X)
+    X = scaler.fit_transform(X)
     ### ========== TODO : END ========== ###
 
 
@@ -359,6 +358,7 @@ def main():
     clf2 = RandomClassifier()
     clf2.fit(X, y)
     y_pred = clf2.predict(X)
+    # write_predictions(y_pred, 'result.csv', 'random classifier')
     train_error = 1 - metrics.accuracy_score(y, y_pred, normalize=True)
     print('\t-- training error: %.3f' % train_error)
 
@@ -445,11 +445,12 @@ def main():
     # print(scores)
     # find k value at the position with max score
     best_k = k_vals[scores.index(max(scores))]
-    print('\tThe best value of number neighbors: ', best_k)
+    errors = [1-i for i in scores]
+    print('\tThe best value of number of neighbors: ', best_k)
     plt.figure()
-    plt.plot(k_vals, scores)
+    plt.plot(k_vals, errors)
     plt.xlabel('number of neighbors, k')
-    plt.ylabel('cross val score')
+    plt.ylabel('cross validation error')
     plt.title('figure of k-Nearest Neighbors performance vs neighbors num')
     # plt.show()
     plt.savefig('score vs neighbors.jpg')
@@ -504,11 +505,9 @@ def main():
     neighbors_train_errs = []
     neighbors_test_errs = []
     for size in training_size:
-        sss = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=0)
-        train_errors = []
-        test_errors = []
+        # sss = StratifiedShuffleSplit(n_splits=10, test_size=0.1, random_state=0)
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.1)
-        X_train = X_train[:int(len(X_train) * size)]
+        X_train = X_train[:int(len(X_train) * size)]    # take the first 'size' portion of data
         y_train = y_train[:int(len(y_train) * size)]
         # fit and predict
         clf_k = KNeighborsClassifier(n_neighbors=best_k)
