@@ -1,0 +1,214 @@
+\documentclass[11pt]{article}
+\usepackage{course}
+\usepackage{upquote}
+\usepackage{minted}
+\fvset{frame=single}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+\DeclarePairedDelimiterX{\norm}[1]{\lVert}{\rVert}{#1}
+
+\begin{document}
+
+\ctitle{4}{Kernel, SVM, K-Means, GMM}{Dec 10, 2020 at 11:59 pm}
+\author{}
+\date{}
+\maketitle
+\vspace{-0.75in}
+
+\vspace{-11pt}
+
+\ifsoln
+\else
+\section*{Submission Instructions}
+\begin{itemize}
+\item 
+Submit your solutions electronically on the course Gradescope site as PDF files.
+\item If you plan to typeset your solutions, please use the LaTeX solution template. If you must submit scanned handwritten solutions, please use a black pen on blank white paper and a high-quality scanner app.
+\item For questions involving math and derivation, please provide important intermediate steps and box the final answer clearly.
+\end{itemize}
+
+\begin{itemize}
+\item Please export the notebook to a $\verb|.py|$ file by clicking the “File” $\rightarrow$ “Download.py” and upload to CCLE. 
+
+Your code should be commented appropriately. The most important things:
+\vspace{-\parskip}
+\begin{itemize}[nosep]
+\item Your name and the assignment number should be at the top of each file.
+\item Each class and method should have an appropriate doctsring.
+\item If anything is complicated, it should include some comments.
+\end{itemize}
+\vspace{-\parskip}
+There are many possible ways to approach the programming portion of this assignment, which makes code style and comments very important so that staff can understand what you did. For this reason, you will lose points for poorly commented or poorly organized code.
+\end{itemize}
+
+\begin{itemize}
+\item Even though this assignment is mainly calling sklearn packages, please copy-paste your code as part of the solution in the submission along with all the plots and the rest of the solutions (math derivation, justifications to the plots) to Gradescope
+
+\end{itemize}
+\clearpage
+\fi
+
+\section{Kernels \problemworth{30}}
+One way to construct complex kernels is to build from simple ones. 
+In the following, we will prove a list of properties of kernels (Rule 1 -- Rule 5) and then use these rules to show the Gaussian kernel $k(x,z) = \exp (\frac{-\norm{x-z}^2}{\sigma^2})$ is a valid kernel.
+
+\begin{enumerate}
+\item \itemworth{5} Rule 1: Suppose we have $ x\in \mathbb{X}, z \in \mathbb{X},\;\;  g: \mathbb{X} \rightarrow \mathbb{R}$. Prove that 
+$ k(x,z) = g(x)\times g(z)$ is a valid kernel by constructing a feature map $\Phi(\cdot)$ and show that $k(x,z)=\Phi(x)^T\Phi(z)$.
+\solution{}
+
+\item \itemworth{5} Rule 2: Suppose we have a valid kernel $k_1(x,z) = \Phi_1(x)^T\Phi_1(z)$. Prove that $k(x,z) = \alpha \cdot k_1(x,z)\;\; \forall \alpha \geq 0$ is also a valid kernel by constructing a new feature map $\Phi(\cdot)$ using  $\Phi_1(\cdot)$ and show that $k(x,z)=\Phi(x)^T\Phi(z)$.   \newline
+\solution{}
+
+\item \itemworth{5} Rule 3:  Suppose we have two valid kernels $k_1(x,z) = \Phi_1(x)^T\Phi_1(z)$ and $k_2(x,z)= \Phi_2(x)^T\Phi_2(z)$. Prove that $k(x,z) = k_1(x,z) +  k_2(x,z)$ is also a valid kernel by constructing a new feature map  $\Phi(\cdot)$ using  $\Phi_1(\cdot)$ and  $\Phi_2(\cdot)$  and show that $k(x,z)=\Phi(x)^T\Phi(z)$. \newline
+\solution{}
+
+\item \itemworth{5}  Rule 4: Suppose we have two valid kernels $k_1(x,z) = \Phi_1(x)^T\Phi_1(z)$ and $k_2(x,z)= \Phi_2(x)^T\Phi_2(z)$. Prove that $k(x,z) = k_1(x,z) \times k_2(x,z)$ is a valid kernel by  constructing a new feature map $\Phi(\cdot)$ using  $\Phi_1(\cdot)$ and  $\Phi_2(\cdot)$ and show that $k(x,z)=\Phi(x)^T\Phi(z)$.\newline
+\solution{}
+
+\item \itemworth{5}  Rule 5: Suppose we have a valid kernel $k_1(x,z) = \Phi_1(x)^T\Phi_1(z)$. Prove that $\exp(k_1(x,z))$ is also a valid kernel by applying 
+Rules 1-4 in problem 1(a)-1(d). 
+\newline Hint:  
+\begin{align*}
+\exp(k_1(x,z))
+&= \lim_{i \to \infty} 1 + k_1(x,z) + . . . + \frac{k_1^{i}(x,z)}{i!} \\
+&= 1 + \sum_{i = 1} ^{i = \infty} \frac{k_1^{i}(x,z)}{i!},
+\end{align*}
+where $k_1^{i}(x,z)$ is $k_1(x,z)$  to the power of $i$.\newline
+\solution{}
+
+\item \itemworth{5} Prove the Gaussian Kernel $k(x,z) = \exp (\frac{-\norm{x-z}^2}{\sigma^2})$ is a valid kernel by applying Rules 1-5 in problem 1(a)-1(e). \newline
+\solution{}
+
+\end{enumerate}
+
+\section{SVM \problemworth{25}}
+
+Suppose we have the following six training examples. $x_1, x_2, x_3$ are positive instances and  $x_4, x_5, x_6$ are negative instances. Note: we expect you to use a simple geometric argument to narrow down the search and derive the same solution SVM optimization would result in for the following two questions. You don't need to write a program to solve this problem.
+$$\begin{bmatrix}
+	Example & feature_1  & feature_2 & y \\
+	\hline
+	x_1 & 1  & 7  & 1  \\
+	x_2 & 3  & 2  & 1  \\
+	x_3 & 4  & 10 & 1  \\
+	x_4 & -1 & -7 & -1 \\
+	x_5 & 1  & -1 & -1 \\
+	x_6 & 3  & -6 & -1 \\
+\end{bmatrix}$$
+
+\begin{enumerate}
+\item \itemworth{5} 
+Suppose we are looking for a hard-SVM decision boundary $\vect{w}^T \vect{x}_n +b =0$ passing through origin (i.e., $b=0$). In other words, we minimize $||\vect{w}||_2$ subject to $y_n \vect{w}^T \vect{x}_n \geq 1, n = 1, \ldots, N$. Identify the \verb|support vectors| (data points that are actually used in the calculation of $w$ and margin) in this training dataset. \newline
+\solution{}
+
+\item \itemworth{5}
+Following part (a), what is $\vect{w}^\ast \in \mathbb{R}^2$ in this case and what is the margin: $\frac{1}{\|\vac{w}^\ast\|_2}$? \newline
+\solution{}
+
+\item \itemworth{15} Suppose we now allow the offset parameter $b$ to be non-zero. In other words,  we minimize $||\vect{w}||_2$ subject to $y_n (\vect{w}^T \vect{x}_n + b) \geq 1, n = 1, \ldots, N$. How would the classifier and the actual margin change in the previous question? What are $\vect{w}^\ast, b^\ast, \frac{1}{\|\vect{w}^\ast\|_2}$,? Compare your solutions with problem 2(b).\newline
+\solution{}
+
+\end{enumerate}
+
+
+\section{K-means \problemworth{10}}
+In this problem, we will first work through a numerical K-means example for a one-dimensional data and show that K-Means does not guarantee global optimal solution. 
+
+\begin{enumerate}
+\item \label{k1d1} \itemworth{5} Consider the case where $K = 3$ and we have 4 data points $x_1 = 1, x_2 = 2, x_3 = 5, x_4 = 7$. What is the optimal clustering for this data ? What is the corresponding value of the objective $\sum_{n=1}^N \sum_{k=1}^{K}\gamma_{nk}\|x_n - \mu_k\|_2^2$?  ($x_n$ denotes the $n^{th}$ data point, $\mu_k$ denotes the cluster mean of the $k^{th}$ cluster and $\gamma_{nk}$ is a Boolean indicator variable and is set to 1 only if $n^{th}$ data point belongs to $k^{th}$ cluster.)\newline
+\solution{}
+
+\item \label{k1d2} \itemworth{5} In K-Means, if we initialize the cluster centers as $$c_1=1,c_2=2,c_3=6$$ what is the corresponding cluster assignment and the objective $\sum_{n=1}^N \sum_{k=1}^{K}\gamma_{nk}\|x_n - \mu_k\|_2^2$ at the first iteration? Does k-Mean algorithm improve the clusters at the second iteration? \newline
+\solution{}
+\end{enumerate}
+
+
+\section{Twitter analysis using SVMs, KMeans, GMM \problemworth{35}}\label{sec:intro}
+
+In this project, you will be working with Twitter data. Specifically, we have supplied you with a number of tweets that are reviews/reactions to 4 different movies\footnote{Please note that these data were selected at random and thus the content of these tweets do not reflect the views of the course staff. :-)},
+
+e.g., \textit{``@nickjfrost just saw The Boat That Rocked/Pirate Radio and I thought it was brilliant! You and the rest of the cast were fantastic! $<$ 3''.}
+
+
+The original data can be found \href{https://drive.google.com/file/d/118i544Dxn9LHPeCoaPe4rwXfWGiRXeyh/view?usp=sharing}{here}  if you are interested in skimming through the tweets to get a sense of the data. We have preprocessed them for you and export them to a \href{https://drive.google.com/file/d/1peuPuSMEmy9DT2hpAYBWj1srur_OkcVq/view?usp=sharing}{tweet\_df.txt} file
+
+Specifically, we use a bag-of-words model to convert each tweet into a feature vector. A bag-of-words model treats a text file as a collection of words, disregarding word order. The first step in building a bag-of-words model involves building a ``dictionary''. A dictionary contains all of the unique words in the text file. For this project, we will be including punctuations in the dictionary too. For example, a text file containing \textit{``John likes movies. Mary likes movies2!!''} will have a dictionary \verb|{'John':0, 'Mary':1, 'likes':2, 'movies':3, 'movies2':4, '.':5, '!':6}|. Note that the $\verb|(key,value)|$ pairs are $\verb|(word, index)|$, where the index keeps track of the number of unique words (size of the dictionary).
+
+Given a dictionary containing $d$ unique words, we can transform the $n$ variable-length tweets into $n$ feature vectors of length $d$ by setting the $i^\textrm{th}$ element of the $j^\textrm{th}$ feature vector to $1$ if the $i^\textrm{th}$ dictionary word is in the $j^\textrm{th}$ tweet, and $0$ otherwise.
+
+The preprocessed data contains 628 tweets on 4 different movies. Each line in the file contains exactly one tweet, so there are 628 lines in total. 
+If a tweet praises or recommends a movie, it is classified as a positive review and labeled $+1$; otherwise it is classified as a negative review and labeled $-1$. The labels for positive or negative reviews as well as the labels for which movie is this tweet referring to are also included in the file. 
+
+You will learn to automatically classify such tweets as either positive or negative reviews. To do this, you will employ Support Vector Machines (SVMs), a popular choice for a large number of classification problems. You will also learn to automatically cluster such tweets in low dimensional space with Gaussian Mixture Model (GMM) and Kmeans. 
+
+Next, please download the preprocessed version of the tweets data \href{https://drive.google.com/file/d/1peuPuSMEmy9DT2hpAYBWj1srur_OkcVq/view?usp=sharing}{tweet\_df.txt} and upload them to your google drive. For all the coding, please refer to the following colab notebook  
+\href{https://colab.research.google.com/drive/1HAefzTFUIupG5_o8fzv3oKGfHZLCjVAx?usp=sharing}{Fall2020-CS146-HW4.ipynb}. Please save a local copy to your own drive first and only edit the TODO blocks in the notebook.
+
+\section*{Documentation}
+
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+
+\begin{itemize}[nolistsep]
+\item Support Vector Machine: \href{https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html}{link}
+\item F1 score: \href{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html}{link}
+\item PCA: \href{https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html}{link}
+\item KMeans: \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html}{link}
+\item Gaussian Micture Model: \href{https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html}{link}
+\item Adjusted Rand Index: \href{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html}{link}
+\end{itemize}
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+
+\subsection{Hyper-parameter Selection for a Linear-Kernel SVM [15 pts]}\label{sec:linear}
+
+We will learn a classifier to separate the training data into positive and negative tweets. For the classifier, we will use SVMs with the linear kernel. We will use the \verb|sklearn.svm.SVC| class and explicitly set only two of the initialization parameters: \verb|kernel| set to 'linear', and \verb|C|. As usual, we will use \verb|SVC.fit(X,y)| to train our SVM,and \verb|SVC.predict(X)| to make predictions.
+
+SVMs have hyperparameters that must be set by the user. For linear kernel SVM, we will select the hyper-parameter using a simple train set and a development set. In the notebook, the train, dev, test split is already done for you. Please do NOT change that split on your own as we will evaluate all answers under the  split we provided in the Notebook. We will train several different models with different hyper-parameters using the train set and select the hyper-parameter that leads to the `best' performance in the dev set. 
+\begin{enumerate}
+
+\item \itemworth{10} Please use \textbf{F1-Score} as the performance measure. Train the linear SVM with different values of \verb|C|, $\verb|C| = 10^{-3}, 10^{-2}, 10^{-1}, 1, 10, 10^{2}, 10^{3}$. Plot the train f1 score and the dev f1 score against different choices of \verb|C|.  Include this plot in your writeup, and provide a 1-2 sentence description of your observations. What is the effect of C? What is the best value of \verb|C|? What is the dev set f1-score when using the best \verb|C|? \textbf{Please also copy-paste your code as part of the solution for this problem.}\newline
+\solution{}
+
+
+\item \itemworth{5} Retraining the model with the best \verb|C| on the train and dev set together. Report the F1-score on the test set. \textbf{Please also copy-paste your code as part of the solution for this problem.}\newline
+\solution{}
+
+\end{enumerate}
+
+
+\subsection{Low Dimensional Embedding Space Clustering \problemworth{20}}\label{sec:test}
+In this section, we will explore two unsupervised clustering algorithms: KMeans and GMM. The preprocessed twitter data lives in high (1811) dimensional space but it is hard for us to visualize more than three dimensional objects. Let's project the data into a low dimensional embedding space with a commonly used algorithm: Principal Component Analysis (PCA). We have already provided the code to do that. Please run it and from now on work with \verb|X_embedding| variable which is 628 by 2 instead of 628 by 1811. If you are interested in the math behind PCA here are some good reading materials: \href{https://towardsdatascience.com/a-one-stop-shop-for-principal-component-analysis-5582fb7e0a9c}{A One-Stop Shop for Principal Component Analysis}, \href{https://en.wikipedia.org/wiki/Principal_component_analysis}{Wikipedia page for PCA}. However, for this project you are not required to know the math behind it. Intuitively, this algorithm is extracting the most useful linear combination of the features such that it reduces the amount of information loss occurred when projecting from high (1811) dimensions to low (2) dimensions. 
+
+We will also evaluate the purity of the clusters returned from any unsupervised algorithms against the ground truth labels from the original \verb|tweet_df.txt|. 
+
+
+Here we will use \verb|sklearn.metrics.adjusted_rand_score|. On a high level, this metric is measuring what fraction of the examples are labeled correctly but normalized so that if the cluster assignment is near random then the adjusted rand score will be close to 0. If the assignment is near perfect, the adjusted rand score should be close to 1. 
+
+\begin{enumerate}
+
+\item \itemworth{5} Visualize the low dimensional data by calling function \verb|plot_scatter|. First label/color the scatter plot by positive or negative reviews. Then label/color each tweet/dot by which movie is that review referring to. Do positive reviews and negative reviews form two nice clusters? Do 4 different movies form nice clusters? Include both plots in your writeup. \textbf{Please also copy-paste your code as part of the solution for this problem.}\newline
+\solution{}
+
+
+\item \itemworth{7.5} Use the \verb|sklearn.cluster.KMeans| class on \verb|X_embedding| with \verb|n_clusters| set to 4, \verb|init| set to 'random', \verb|n_init| set to 1, and \verb|random_state| set to 2. Visualize the low dimensional data by labeling/coloring each tweet with Kmeans results. Calculate the adjusted rand score
+
+Use the \verb|sklearn.mixture.GaussianMixture| class on \verb|X_embedding| with \verb|n_components| set to 4, \verb|random_state| set to 0 \verb|init_params| set to 'random'. 
+Visualize the low dimensional data by labeling/coloring each tweet with GMM results. Calculate the adjusted rand score
+
+Visually, do you think they perform poorly or great? What are the adjusted rand scores for both Kmeans labels and GMM labels? Why might that be the case? Include both plots, the performance results, and a 1-2 sentence description/justification of what you saw in your writeup. \textbf{Please also copy-paste your code as part of the solution for this problem.}\newline
+\solution{}
+
+\item \itemworth{7.5} 
+Use the \verb|sklearn.cluster.KMeans| class on \verb|X_embedding| with \verb|n_clusters| set to 4, \verb|init| set to 'random', \verb|n_init| set to 100, and \verb|random_state| set to 2.
+Visualize the low dimensional data by labeling/coloring each tweet with Kmeans over 100 different starting points results. Calculate the adjusted rand score
+
+Use the \verb|sklearn.mixture.GaussianMixture| class on \verb|X_embedding| with \verb|n_components| set to 4, \verb|random_state| set to 0 \verb|init_params| set to 'random', and  \verb|n_init| set to 100. 
+Visualize the low dimensional data by labeling/coloring each tweet with this random initialized GMM but with 100 different starting points results. Calculate the adjusted rand score
+
+Do you see a huge performance gain over what we got from part (b)? Include both plots, the performance results, and a 1-2 sentence description/justification of what you saw in your writeup. \textbf{Please also copy-paste your code as part of the solution for this problem.}\newline
+\solution{}
+
+\end{enumerate}
+\end{document}
